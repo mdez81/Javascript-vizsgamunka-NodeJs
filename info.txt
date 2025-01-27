@@ -1,0 +1,8 @@
+
+cd admin
+npm start
+
+http://localhost:3000/
+
+felhasználónév: admin
+jelszó: admin?123

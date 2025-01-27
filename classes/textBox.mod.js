@@ -1,5 +1,4 @@
 import MyCustomPanel from "./customAlertBox.mod.js";
-//import * as myCalendar from "./customCalendar.mod.js";
 
 export class MyTextBox {
     element;
@@ -32,7 +31,6 @@ export class MyTextBox {
             this.parentElement = options.renderTo;
         }
 
-        //this.hairdresserId = hairdresser.id;
 
         const myDiv = document.createElement("div");
         myDiv.innerHTML = MyTextBox.#template;
@@ -48,9 +46,8 @@ export class MyTextBox {
         this.appointmentBtnElement = document.createElement("button");
         this.appointmentBtnElement.textContent = "Foglalás";
         this.appointmentBtnElement.classList.add("reserve-btn");
-        // Inside MyTextBox class
+
         this.appointmentBtnElement.addEventListener("click", () => {
-            // Get the data when Reserve is clicked
             const selectedService = this.servicesElement.options[this.servicesElement.selectedIndex].text;
             const name = this.nameElement.textContent;
             const profileImage = this.imageElement.src;
@@ -58,7 +55,6 @@ export class MyTextBox {
             const endTime = this.endWorkElement.textContent;
             const hairdresserId = this.hairdresserId;
 
-            // Pass the data to the alert box
             const customAlertBox = new MyCustomPanel();
             customAlertBox.showWithDetails(name, profileImage, selectedService, startTime, endTime, hairdresserId);
         });

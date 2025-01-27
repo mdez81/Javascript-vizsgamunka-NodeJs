@@ -12,22 +12,16 @@ const path = require('path');
 const PORT = 3000;
 const JWT_SECRET = 'your_jwt_secret_key';
 
-// Database connection
+
 const db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'login_register'
+    database: 'hair_salon'
 });
 
-const db2 = mysql.createConnection({
-  host: "localhost",
-  user: "root", // Állítsd be az adatbázisod felhasználónevét
-  password: "", // Állítsd be az adatbázisod jelszavát
-  database: "hair_salon",
-});
 
-// Middleware
+
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from 'public' folder
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -35,7 +29,7 @@ app.use(express.static('public'));
 app.use(cors());
 app.use(bodyParser.json());
 
-// Routes
+
 app.get('/', (req, res) => {
     res.redirect('/login');
 });
@@ -47,7 +41,7 @@ app.get('/dashboard', (req, res) => res.sendFile(__dirname + '/views/dashboard.h
 app.post('/register', (req, res) => {
     const { username, email, password } = req.body;
 
-    // Hash password
+
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     const sql = 'INSERT INTO users (username, email, password) VALUES (?, ?,?)';
@@ -85,14 +79,12 @@ db.connect(err => {
 
 
 
-// Adatok lekérése az API-ról és beszúrás csak akkor, ha az appointments tábla üres
 axios.get("https://salonsapi.prooktatas.hu/api/appointments")
     .then(response => {
         const appointments = response.data;
 
-        // Ellenőrizzük, hogy az appointments tábla üres-e
         const checkQuery = "SELECT COUNT(*) AS count FROM appointments";
-        db2.query(checkQuery, (err, results) => {
+        db.query(checkQuery, (err, results) => {
             if (err) {
                 console.error("Error checking appointments table:", err);
                 return;
@@ -102,7 +94,7 @@ axios.get("https://salonsapi.prooktatas.hu/api/appointments")
             if (count === 0) {
                 console.log("Appointments table is empty. Inserting data...");
 
-                // Beillesztés az adatbázisba
+
                 const insertQuery = `
                     INSERT INTO appointments (hairdresser_id, customer_name, customer_phone, appointment_date, service) 
                     VALUES (?, ?, ?, ?, ?)`;
@@ -136,9 +128,9 @@ axios.get("https://salonsapi.prooktatas.hu/api/hairdressers")
     .then(response => {
         const hairdressers = response.data;
 
-        // Check if the hairdressers table is empty
+
         const checkQuery = "SELECT COUNT(*) AS count FROM hairdressers";
-        db2.query(checkQuery, (err, results) => {
+        db.query(checkQuery, (err, results) => {
             if (err) {
                 console.error("Error checking hairdressers table:", err);
                 return;
@@ -148,13 +140,13 @@ axios.get("https://salonsapi.prooktatas.hu/api/hairdressers")
             if (count === 0) {
                 console.log("Hairdressers table is empty. Inserting data...");
 
-                // Insert data into the hairdressers table
+
                 const insertQuery = `
                     INSERT INTO hairdressers (id, name, phone_number, email) 
                     VALUES (?, ?, ?,?)`;
 
                 hairdressers.forEach(hairdresser => {
-                    db2.query(insertQuery, [
+                    db.query(insertQuery, [
                         hairdresser.id,
                         hairdresser.name,
                         hairdresser.phone_number,
@@ -192,12 +184,12 @@ app.get("/api/hairdressers", (req, res) => {
 
 
 
-// Lekérdezés időpontok alapján
+
 app.get("/api/appointments", (req, res) => {
     const { hairdresser_id } = req.query;
 
     const query = "SELECT * FROM appointments WHERE hairdresser_id = ?";
-    db2.query(query, [hairdresser_id], (err, results) => {
+    db.query(query, [hairdresser_id], (err, results) => {
         if (err) {
             console.error("Error fetching appointments:", err);
             res.status(500).send("Server error.");
@@ -207,12 +199,24 @@ app.get("/api/appointments", (req, res) => {
     });
 });
 
-// Törlés
+app.get("/api/appointments/:id", (req, res) => {
+    const appointmentId =  parseInt(req.params.id);  // Get the ID from the request
+    const appointments = [];  // Replace this with your actual data source (e.g., a database or JSON file)
+
+    const appointment = appointments.find(app => app.id === appointmentId);
+    if (appointment) {
+        res.json(appointment);  // Return the appointment as JSON
+    } else {
+        res.status(404).json({ error: "Appointment not found" });  // Return a 404 if not found
+    }
+});
+
+
 app.delete("/api/appointments/:id", (req, res) => {
     const { id } = req.params;
 
     const query = "DELETE FROM appointments WHERE id = ?";
-    db2.query(query, [id], (err, results) => {
+    db.query(query, [id], (err, results) => {
         if (err) {
             console.error("Error deleting appointment:", err);
             res.status(500).send("Server error.");
@@ -222,19 +226,19 @@ app.delete("/api/appointments/:id", (req, res) => {
     });
 });
 
-// Módosítás
+
 app.put("/api/appointments/:id", (req, res) => {
     const { id } = req.params;
-    const { customer_name, customer_phone } = req.body;
+    const { customer_name, customer_phone, appointment_date } = req.body;
 
     const query = `
       UPDATE appointments 
-      SET customer_name = ?, customer_phone = ? 
+      SET customer_name = ?, customer_phone = ?, appointment_date = ? 
       WHERE id = ?`;
 
-    db2.query(
+    db.query(
         query,
-        [customer_name, customer_phone, id],
+        [customer_name, customer_phone, appointment_date, id],
         (err, results) => {
             if (err) {
                 console.error("Error updating appointment:", err);
@@ -247,7 +251,7 @@ app.put("/api/appointments/:id", (req, res) => {
 });
 
 
-// Start server
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

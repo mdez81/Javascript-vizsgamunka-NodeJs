@@ -4,21 +4,21 @@ export default class MyCustomAlertBox {
         this.element.className = "alert-container";
         this.element.style.display = "none"; // Initially hidden
 
-        // Alert content
+      
         const alertContent = document.createElement("div");
         alertContent.className = "alert-content";
         this.element.appendChild(alertContent);
 
-        // Alert text
+
         this.alertText = document.createElement("p");
         this.alertText.classList.add("alert-text");
         alertContent.appendChild(this.alertText);
 
-        // Button container
+
         const btnContainer = document.createElement("div");
         alertContent.appendChild(btnContainer);
 
-        // Close button
+
         this.closeBtn = document.createElement("button");
         this.closeBtn.textContent = "Rendben";
         this.closeBtn.classList.add("alert-btn");
