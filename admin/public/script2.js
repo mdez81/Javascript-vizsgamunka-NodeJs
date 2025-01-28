@@ -74,54 +74,50 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    if (event.target.classList.contains("edit-btn")) {
-        const appointmentId = parseInt(event.target.dataset.id);
-    
-        // Fetch the current appointment details before editing
-        fetch(`http://localhost:3000/api/appointments/${appointmentId}`)
-            .then(response => response.json())
-            .then(data => {
-                // Use current values as default in the prompt
-                const newCustomerName = prompt("Enter new customer name:", data.customer_name);
-                const newCustomerPhone = prompt("Enter new customer phone:", data.customer_phone);
-                const newAppointmentDate = prompt("Enter new appointment date (YYYY-MM-DD):", data.appointment_date);
-    
-                if (newCustomerName && newCustomerPhone && newAppointmentDate) {
-                    fetch(`http://localhost:3000/api/appointments/${appointmentId}`, {
-                        method: "PUT",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            customer_name: newCustomerName,
-                            customer_phone: newCustomerPhone,
-                            appointment_date: newAppointmentDate,
-                        }),
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! Status: ${response.status}`);
-                        }
-                        return response.json();
-                    })
-                    .then(updatedAppointment => {
-                        alert("Appointment updated successfully.");
-                        // Optionally re-fetch appointments to update the UI
-                        hairdresserSelect.dispatchEvent(new Event("change"));
-                    })
-                    .catch(error => {
-                        console.error("Error updating appointment:", error);
-                        alert("Error updating appointment: " + error.message);
-                    });
-                }
-            })
-            .catch(error => {
-                console.error("Error fetching appointment details:", error);
-                alert("Error fetching appointment details: " + error.message);
-            });
-    }
-    
+        if (event.target.classList.contains("edit-btn")) {
+            const appointmentId = parseInt(event.target.dataset.id);
+          
+            fetch(`http://localhost:3000/api/appointments/${appointmentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const newCustomerName = prompt("Enter new customer name:", data.customer_name);
+                    const newCustomerPhone = prompt("Enter new customer phone:", data.customer_phone);
+                    const newAppointmentDate = prompt("Enter new appointment date (YYYY-MM-DD):", data.appointment_date);
+        
+                    if (newCustomerName && newCustomerPhone && newAppointmentDate) {
+                        fetch(`http://localhost:3000/api/appointments/${appointmentId}`, {
+                            method: "PUT",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({
+                                customer_name: newCustomerName,
+                                customer_phone: newCustomerPhone,
+                                appointment_date: newAppointmentDate,
+                            }),
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! Status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(updatedAppointment => {
+                            alert("Appointment updated successfully.");
+                            // Optionally re-fetch appointments to update the UI
+                            hairdresserSelect.dispatchEvent(new Event("change"));
+                        })
+                        .catch(error => {
+                            console.error("Error updating appointment:", error);
+                            alert("Error updating appointment: " + error.message);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching appointment details:", error);
+                    alert("Error fetching appointment details: " + error.message);
+                });
+        }
 });
-
 
 });

@@ -200,16 +200,32 @@ app.get("/api/appointments", (req, res) => {
 });
 
 app.get("/api/appointments/:id", (req, res) => {
-    const appointmentId =  parseInt(req.params.id);  // Get the ID from the request
-    const appointments = [];  // Replace this with your actual data source (e.g., a database or JSON file)
+    const appointmentId = parseInt(req.params.id, 10);
 
-    const appointment = appointments.find(app => app.id === appointmentId);
-    if (appointment) {
-        res.json(appointment);  // Return the appointment as JSON
-    } else {
-        res.status(404).json({ error: "Appointment not found" });  // Return a 404 if not found
+    console.log("🔍 Fetching appointment with ID:", appointmentId);
+
+    if (isNaN(appointmentId)) {
+        console.log("Invalid appointment ID:", req.params.id);
+        return res.status(400).json({ error: "Invalid appointment ID" });
     }
+
+    const query = "SELECT * FROM appointments WHERE id = ?";
+    db.query(query, [appointmentId], (err, results) => {
+        if (err) {
+            console.error("Database query error:", err);
+            return res.status(500).json({ error: "Database query error" });
+        }
+
+        if (results.length === 0) {
+            console.log("Appointment not found:", appointmentId);
+            return res.status(404).json({ error: "Appointment not found" });
+        }
+
+        //console.log("Appointment found:", results[0]);
+        res.json(results[0]); 
+    });
 });
+
 
 
 app.delete("/api/appointments/:id", (req, res) => {
